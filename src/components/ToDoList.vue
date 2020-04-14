@@ -1,8 +1,8 @@
 <template>
   <v-container>
     <v-card outlined class="mx-auto" min-width="600" max-width="1000" min-height="200">
-      <v-card-title style="background-color: #E8EAF6;">Todo List</v-card-title>
-      <v-card-text style="background-color: #E8EAF6;">
+      <v-card-title class="bg_color_white list_title_style">Todo List</v-card-title>
+      <v-card-text class="bg_color_white">
         <v-row justify="center">
           <v-col cols=8>
             <v-text-field
@@ -67,7 +67,7 @@
           </v-col>
           <v-col cols=12>
             <v-row justify="center">
-              <v-btn-toggle v-model="filter">
+              <v-btn-toggle v-model="taskFilter">
                 <v-col>
                   <v-btn rounded color="indigo lighten-2" value="all" outlined>All ({{toDos.length}})</v-btn>
                 </v-col>
@@ -88,70 +88,96 @@
 
 <script>
 export default {
-  data () {
-    return {
-      newTask: '',
-      filter: 'all',
-      toDos: [],
-      percentage: 0,
-      checkAll: false
-    }
-  },
+  // data () {
+  //   return {
+  //     newTask: '',
+  //     taskFilter: 'all',
+  //     toDos: [],
+  //     percentage: 0,
+  //     checkAll: false
+  //   }
+  // },
   watch: {
-    filter: function (value) {
-      this.viewToDo = value === 'all' ? this.toDos : this.toDos.filter(task => task.isDone === Boolean(value === 'done'))
-    },
-    percentage: function (percent) {
-      percent = this.toDos.filter(task => task.isDone === true).length / this.toDos.length
-      return percent
-    },
-    checkAll: function (check) {
-      this.toDos.forEach(task => task.isDone = check)
-    }
+    // taskFilter: function (value) {
+    //   this.viewToDo = value === 'all' ? this.toDos : this.toDos.filter(task => task.isDone === Boolean(value === 'done'))
+    // },
+    // percentage: function (percent) {
+    //   percent = this.toDos.filter(task => task.isDone === true).length / this.toDos.length
+    //   return percent
+    // },
+    // checkAll: function (check) {
+    //   this.toDos.forEach(task => task.isDone = check)
+    // }
   },
   computed: {
-    viewToDo: function (view) {
-      view = this.filter === 'all' ? this.toDos : this.toDos.filter(task => task.isDone === Boolean(this.filter === 'done'))
-      return view
-    }
-  },
-  methods: {
-    addNewTask () {
-      let uuid = this.__uuid()
-      let defaultTask = {
-        uuid: uuid,
-        task: this.newTask,
-        isEdit: false,
-        isDone: false
-      }
-      this.toDos.push(defaultTask)
-      this.newTask = ''
-    },
-    deleteTask (index) {
-      let indexOftoDo = this.toDos.findIndex(toDo => toDo.task === this.viewToDo[index].task)
-      this.toDos.splice(indexOftoDo, 1)
-    },
-    deleteDone () {
-      let doneIndex = this.toDos.map(function(task, i) {
-        if (task.isDone) return i
-      })
-      for (let i = doneIndex.length - 1; i >= 0; i--) {
-        doneIndex[i] !== undefined && this.toDos.splice(doneIndex[i], 1)
+    taskFilter: {
+      get () {
+        return this.$store.getters.taskFilter
+      },
+      set (value) {
+        this.$store.dispatch('taskFilter', value)
       }
     },
-    __uuid () {
-      let date = Date.now()
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (text) {
-        let random = (date + Math.random() * 16) % 16 | 0
-        date = Math.floor(date / 16)
-        return (text === 'x' ? random : (random & 0x3 | 0x8)).toString(16)
-      })
+    newTask: {
+      get () {
+        return this.$store.getters.newTask
+      },
+      set (val) {
+        this.$store.dispatch('taskDetail', val)
+      }
     }
   }
+  // computed: {
+  //   viewToDo: function (view) {
+  //     view = this.filter === 'all' ? this.toDos : this.toDos.filter(task => task.isDone === Boolean(this.filter === 'done'))
+  //     return view
+  //   }
+  // },
+  // methods: {
+  //   addNewTask () {
+  //     let uuid = this.__uuid()
+  //     let defaultTask = {
+  //       uuid: uuid,
+  //       task: this.newTask,
+  //       isEdit: false,
+  //       isDone: false
+  //     }
+  //     this.toDos.push(defaultTask)
+  //     this.newTask = ''
+  //   },
+  //   deleteTask (index) {
+  //     let indexOftoDo = this.toDos.findIndex(toDo => toDo.task === this.viewToDo[index].task)
+  //     this.toDos.splice(indexOftoDo, 1)
+  //   },
+  //   deleteDone () {
+  //     let doneIndex = this.toDos.map(function(task, i) {
+  //       if (task.isDone) return i
+  //     })
+  //     for (let i = doneIndex.length - 1; i >= 0; i--) {
+  //       doneIndex[i] !== undefined && this.toDos.splice(doneIndex[i], 1)
+  //     }
+  //   },
+  //   __uuid () {
+  //     let date = Date.now()
+  //     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (text) {
+  //       let random = (date + Math.random() * 16) % 16 | 0
+  //       date = Math.floor(date / 16)
+  //       return (text === 'x' ? random : (random & 0x3 | 0x8)).toString(16)
+  //     })
+  //   }
+  // }
 }
 </script>
 
 <style lang="scss" scoped>
+.bg_color_white {
+  background-color: #E8EAF6;
+}
+
+.list_title_style {
+  color: #7986CB;
+}
+
 .task_done_style {
   text-decoration: line-through;
   color: #7986CB;
