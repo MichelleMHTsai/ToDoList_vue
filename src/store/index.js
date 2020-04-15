@@ -84,6 +84,7 @@ const store = new Vuex.Store({
       for (let i = doneIndex.length - 1; i >= 0; i--) {
         doneIndex[i] !== undefined && commit('deleteTask', doneIndex[i])
       }
+      if (getters.checkAll) commit('checkAll')
     },
     deleteTask ({ getters, commit }, uuid) {
       let taskIdx = getters.toDos.findIndex(task => task.uuid === uuid)
