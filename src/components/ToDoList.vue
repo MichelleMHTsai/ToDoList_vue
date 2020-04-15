@@ -11,21 +11,21 @@
               solo
               clearable
               v-model="newTask"
-              @keyup.enter="addNewTask"
+              @keyup.enter="addTask"
             />
           </v-col>
           <v-col cols=1>
-            <v-btn color="indigo lighten-2" icon large @click="addNewTask">
+            <v-btn color="indigo lighten-2" icon large @click="addTask">
               <v-icon>mdi-plus</v-icon>
             </v-btn>
           </v-col>
           <v-col cols=1>
-            <v-btn color="indigo lighten-2" icon large @click="checkAll = !checkAll">
+            <v-btn color="indigo lighten-2" icon large @click="checkAll">
               <v-icon>mdi-check-all</v-icon>
             </v-btn>
           </v-col>
           <v-col cols=1>
-            <v-btn color="indigo lighten-2" icon large @click="deleteDone">
+            <v-btn color="indigo lighten-2" icon large @click="removeDone">
               <v-icon>mdi-playlist-remove</v-icon>
             </v-btn>
           </v-col>
@@ -37,12 +37,13 @@
             <template v-for="(todos, i) in viewToDo">
               <v-divider v-show="i != 0" :key="i"></v-divider>
               <v-list-item :key="todos.uuid">
-                <v-checkbox v-model="todos.isDone" :color="todos.isDone ? 'indigo lighten-2' : 'grey'" />
-                <v-text-field v-if="todos.isEdit" v-model="todos.task" @blur="todos.isEdit = false" style="width:80%;" />
+                <v-checkbox v-if="viewToDo[i].isDone" input-value="todos.isDone" @change="updateTask(todos, 'isDone')" color="indigo lighten-2" />
+                <v-checkbox v-else @change="updateTask(todos, 'isDone')" />
+                <v-text-field v-if="todos.isEdit" :value="todos.task" @keyup="$event.keyCode === 13 ? updateTask(todos, 'isEdit') : updateTaskContent(todos, 'content', $event.target.value)" @blur="updateTask(todos, 'isEdit')" style="width:80%;" />
                   <span v-else :class="todos.isDone ? 'task_done_style' : ''" style="width:80%;">{{todos.task}}</span>
                 <v-spacer></v-spacer>
-                <v-btn icon @click="todos.isEdit = true"><v-icon>mdi-square-edit-outline</v-icon></v-btn>
-                <v-btn icon @click="deleteTask(i)"><v-icon>mdi-trash-can-outline</v-icon></v-btn>
+                <v-btn icon @click="updateTask(todos, 'isEdit')"><v-icon>mdi-square-edit-outline</v-icon></v-btn>
+                <v-btn icon @click="deleteTask(todos.uuid)"><v-icon>mdi-trash-can-outline</v-icon></v-btn>
               </v-list-item>
             </template>
           </v-card>
@@ -67,7 +68,7 @@
           </v-col>
           <v-col cols=12>
             <v-row justify="center">
-              <v-btn-toggle v-model="taskFilter">
+              <v-btn-toggle :value="taskFilter" @change="changeView">
                 <v-col>
                   <v-btn rounded color="indigo lighten-2" value="all" outlined>All ({{toDos.length}})</v-btn>
                 </v-col>
@@ -88,84 +89,57 @@
 
 <script>
 export default {
-  // data () {
-  //   return {
-  //     newTask: '',
-  //     taskFilter: 'all',
-  //     toDos: [],
-  //     percentage: 0,
-  //     checkAll: false
-  //   }
-  // },
-  watch: {
-    // taskFilter: function (value) {
-    //   this.viewToDo = value === 'all' ? this.toDos : this.toDos.filter(task => task.isDone === Boolean(value === 'done'))
-    // },
-    // percentage: function (percent) {
-    //   percent = this.toDos.filter(task => task.isDone === true).length / this.toDos.length
-    //   return percent
-    // },
-    // checkAll: function (check) {
-    //   this.toDos.forEach(task => task.isDone = check)
-    // }
-  },
   computed: {
-    taskFilter: {
-      get () {
-        return this.$store.getters.taskFilter
-      },
-      set (value) {
-        this.$store.dispatch('taskFilter', value)
-      }
-    },
     newTask: {
       get () {
         return this.$store.getters.newTask
       },
-      set (val) {
-        this.$store.dispatch('taskDetail', val)
+      set (str) {
+        this.$store.dispatch('newTask', str)
+      }
+    },
+    toDos: {
+      get () {
+        return this.$store.getters.toDos
+      }
+    },
+    viewToDo: {
+      get () {
+        return this.$store.getters.viewToDo
+      }
+    },
+    taskFilter: {
+      get () {
+        return this.$store.getters.taskFilter
       }
     }
+  },
+  methods: {
+    addTask () {
+      this.$store.dispatch('addNewTask')
+    },
+    checkAll () {
+      this.$store.dispatch('checkAll')
+    },
+    removeDone () {
+      this.$store.dispatch('deleteDone')
+    },
+    updateTask (payload, updateMode) {
+      let newPayload = Object.assign(payload, { mode: updateMode })
+      this.$store.dispatch('updateTaskStatus', newPayload)
+    },
+    updateTaskContent (payload, updateMode, str) {
+      Object.assign(payload, { mode: updateMode })
+      payload['task'] = str
+      this.$store.dispatch('updateTaskStatus', payload)
+    },
+    deleteTask (id) {
+      this.$store.dispatch('deleteTask', id)
+    },
+    changeView (value) {
+      this.$store.dispatch('updateFilter', value)
+    }
   }
-  // computed: {
-  //   viewToDo: function (view) {
-  //     view = this.filter === 'all' ? this.toDos : this.toDos.filter(task => task.isDone === Boolean(this.filter === 'done'))
-  //     return view
-  //   }
-  // },
-  // methods: {
-  //   addNewTask () {
-  //     let uuid = this.__uuid()
-  //     let defaultTask = {
-  //       uuid: uuid,
-  //       task: this.newTask,
-  //       isEdit: false,
-  //       isDone: false
-  //     }
-  //     this.toDos.push(defaultTask)
-  //     this.newTask = ''
-  //   },
-  //   deleteTask (index) {
-  //     let indexOftoDo = this.toDos.findIndex(toDo => toDo.task === this.viewToDo[index].task)
-  //     this.toDos.splice(indexOftoDo, 1)
-  //   },
-  //   deleteDone () {
-  //     let doneIndex = this.toDos.map(function(task, i) {
-  //       if (task.isDone) return i
-  //     })
-  //     for (let i = doneIndex.length - 1; i >= 0; i--) {
-  //       doneIndex[i] !== undefined && this.toDos.splice(doneIndex[i], 1)
-  //     }
-  //   },
-  //   __uuid () {
-  //     let date = Date.now()
-  //     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (text) {
-  //       let random = (date + Math.random() * 16) % 16 | 0
-  //       date = Math.floor(date / 16)
-  //       return (text === 'x' ? random : (random & 0x3 | 0x8)).toString(16)
-  //     })
-  //   }
-  // }
 }
 </script>
 
