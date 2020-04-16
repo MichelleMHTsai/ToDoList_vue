@@ -59,6 +59,9 @@ const store = new Vuex.Store({
     },
     updateFilter (state, val) {
       state.taskFilter = val
+    },
+    resetCheckAll (state) {
+      state.checkAll = false
     }
   },
   actions: {
@@ -84,7 +87,6 @@ const store = new Vuex.Store({
       for (let i = doneIndex.length - 1; i >= 0; i--) {
         doneIndex[i] !== undefined && commit('deleteTask', doneIndex[i])
       }
-      if (getters.checkAll) commit('checkAll')
     },
     deleteTask ({ getters, commit }, uuid) {
       let taskIdx = getters.toDos.findIndex(task => task.uuid === uuid)
@@ -100,6 +102,7 @@ const store = new Vuex.Store({
       }
       commit('addNewTask', defaultTask)
       dispatch('newTask', '')
+      if (getters.checkAll) commit('resetCheckAll')
     },
     updateTaskStatus ({ getters, commit }, payload) {
       /* payload is an Object which contains

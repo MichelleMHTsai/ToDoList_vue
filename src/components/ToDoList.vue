@@ -20,7 +20,10 @@
             </v-btn>
           </v-col>
           <v-col cols=1>
-            <v-btn color="indigo lighten-2" icon large @click="checkAll">
+            <v-btn v-if="checkAllValue" outlined color="indigo lighten-2" icon large @click="checkAll">
+              <v-icon>mdi-check-all</v-icon>
+            </v-btn>
+            <v-btn v-else color="indigo lighten-2" icon large @click="checkAll">
               <v-icon>mdi-check-all</v-icon>
             </v-btn>
           </v-col>
@@ -111,6 +114,11 @@ export default {
     taskFilter: {
       get () {
         return this.$store.getters.taskFilter
+      }
+    },
+    checkAllValue: {
+      get () {
+        return this.$store.getters.checkAll
       }
     }
   },

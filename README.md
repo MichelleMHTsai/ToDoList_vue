@@ -10,6 +10,8 @@
   * ```DONE``` only shows completed/checked tasks
   * ```REMAINING``` shows unchecked/unfinished tasks
 * Check all
+  - Checked ![checked](src/assets/checkAll.PNG)
+  - Unchecked ![unchecked](src/assets/checkAllUncheck.PNG)
 * Remove completed/checked tasks
 * Progress bar shows percentage of completed tasks
 
